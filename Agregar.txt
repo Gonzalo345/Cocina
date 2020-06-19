@@ -1,0 +1,4 @@
+http://dan.drown.org/stm32duino/package_STM32duino_index.json
+http://arduino.esp8266.com/stable/package_esp8266com_index.json
+Board: Esp8266
+Librerias: PubSubClient ESP8266WiFi: DHTesp
