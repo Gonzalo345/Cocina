@@ -1,4 +1,7 @@
 http://dan.drown.org/stm32duino/package_STM32duino_index.json
 http://arduino.esp8266.com/stable/package_esp8266com_index.json
+
+https://randomnerdtutorials.com/esp8266-ds18b20-temperature-sensor-web-server-with-arduino-ide/
+
 Board: Esp8266
-Librerias: PubSubClient ESP8266WiFi: DHTesp
+Librerias: PubSubClient; ESP8266WiFi; DHTesp; onewire ("paul stollfreguen"); dallas ("milles bruton")

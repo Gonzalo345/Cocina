@@ -1,10 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <DHTesp.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include "Cocina.h"
 
-DHTesp dht;
 
+DHTesp dht;
+// Setup a oneWire instance to communicate with any OneWire devices
+OneWire oneWire(oneWireBus);
+// Pass our oneWire reference to Dallas Temperature sensor
+DallasTemperature sensors(&oneWire);
 
 unsigned long previousMillis = 0;
 
@@ -15,9 +21,6 @@ String strext = "";
 char TEMPERATURA[50];
 char CALDERA[50];
 
-
-
-float temp;
 
 //-------------------------------------------------------------------------
 WiFiClient espClient;
@@ -89,10 +92,16 @@ void loop() {
   if (currentMillis - previousMillis >= 10000) { //envia la temperatura cada 10 segundos
     tomaLuminosidad(mov);
     delay(dht.getMinimumSamplingPeriod());
-    float temperature = dht.getTemperature();
+
+    sensors.requestTemperatures();
+    float tempPieza = sensors.getTempCByIndex(0);
+    float tempExterior = sensors.getTempCByIndex(1);
+    Serial.println("tempPieza    [" +  String(tempPieza) + " ºC] ");
+    Serial.println("tempExterior [" +  String(tempExterior) + " ºC] ");
+    float tempCocina = dht.getTemperature();
     float humidity = dht.getHumidity();
-    temperature -= 2.0;
-    strtemp =  "T:" + String(temperature, 1) + " H:" + String(humidity, 0);
+    tempCocina -= 1.0;
+    strtemp =  "T:" + String(tempCocina, 1) + " H:" + String(humidity, 0);
     strtemp.toCharArray(valueStr, 15);
 
 
