@@ -7,7 +7,7 @@
 #define luzRoja     D2
 #define dht_dpin    D3      // GPIO-0 D3 pin of nodemcu
 #define oneWireBus  D5      // GPIO where the DS18B20 is connected to
-#define caldera     D6
+#define releCaldera     D6
 #define movimiento  D7
 
 

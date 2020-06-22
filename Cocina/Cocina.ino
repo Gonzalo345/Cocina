@@ -20,6 +20,9 @@ char PLACA[50];
 String strext = "";
 char TEMPERATURA[50];
 char CALDERA[50];
+char TEMPDESEADA[50];
+bool HabilitarCaldera = 0;
+float tempDeseada = 15.0;
 
 
 //-------------------------------------------------------------------------
@@ -29,7 +32,7 @@ PubSubClient client(espClient);
 //------------------------SETUP-----------------------------
 void setup() {
 
-  pinMode(caldera,    OUTPUT);
+  pinMode(releCaldera,    OUTPUT);
   pinMode(luzVerde,   OUTPUT);
   pinMode(luzAzul,    OUTPUT);
   pinMode(luzRoja,    OUTPUT);
@@ -38,7 +41,7 @@ void setup() {
   digitalWrite(luzVerde,  HIGH);
   digitalWrite(luzAzul,   HIGH);
   digitalWrite(luzRoja,   HIGH);
-  digitalWrite(caldera,   LOW);
+  digitalWrite(releCaldera,   LOW);
 
   delay(10);
   dht.setup(dht_dpin, DHTesp::DHT11); // Connect DHT sensor to GPIO 17
@@ -72,6 +75,9 @@ void setup() {
   String caldera = "/" + USERNAME + "/" + "caldera";
   caldera.toCharArray(CALDERA, 50);
 
+  String tempDeseada = "/" + USERNAME + "/" + "";
+  tempDeseada.toCharArray(TEMPDESEADA, 50);
+
 }
 
 //--------------------------LOOP--------------------------------
@@ -89,8 +95,11 @@ void loop() {
   unsigned long currentMillis = millis();
   mov = digitalRead(movimiento);
 
+  tomaLuminosidad(mov);
+
   if (currentMillis - previousMillis >= 10000) { //envia la temperatura cada 10 segundos
-    tomaLuminosidad(mov);
+    previousMillis = currentMillis;
+
     delay(dht.getMinimumSamplingPeriod());
 
     sensors.requestTemperatures();
@@ -105,10 +114,16 @@ void loop() {
     strtemp.toCharArray(valueStr, 15);
 
 
-    previousMillis = currentMillis;
-
     Serial.println("Mensaje enviando: [" +  String(TEMPERATURA) + "] " + strtemp);
     client.publish(TEMPERATURA, valueStr);
+    digitalWrite(releCaldera, LOW);
+    if (HabilitarCaldera){
+      if (tempDeseada > tempPieza){
+        digitalWrite(releCaldera,   HIGH);
+      }
+      else
+        digitalWrite(releCaldera,   LOW);
+      }
   }
 
 }
@@ -129,11 +144,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if (String(topic) ==  String(CALDERA)) {
     if (payload[0] == '1') {
-      digitalWrite(caldera, HIGH);
+      HabilitarCaldera = 1;
+      Serial.println("Caldera habilitada");
     }
     if (payload[0] == '0') {
-      digitalWrite(caldera, LOW);
+      HabilitarCaldera = 0;
+      Serial.println("Caldera deshabilitada");
     }
+  }
+
+  if (String(topic) ==  String(TEMPDESEADA)) {
+      tempDeseada = atof(PAYLOAD);
   }
 }
 
@@ -152,6 +173,7 @@ void reconnect() {
     {
       Serial.println("conectado");
       client.subscribe(CALDERA);
+      client.subscribe(TEMPDESEADA);
     }
     else {
       Serial.print("fallo, rc=");
@@ -179,7 +201,9 @@ void tomaLuminosidad(bool mov){
     voltage = sensorValue * (3.3 / 1023.0); //escalamos a voltaje
     Serial.print("    ADC= ");
     Serial.print(sensorValue);
-    if (sensorValue < 256){ sensorValue = 256;}
+    if (sensorValue < 64){ sensorValue = 64;}
+    if (sensorValue > 64  && sensorValue < 128) { sensorValue = 128;}
+    if (sensorValue > 128 && sensorValue < 256) { sensorValue = 256;}
     if (sensorValue > 256 && sensorValue < 512) { sensorValue = 512;}
     if (sensorValue > 512 && sensorValue < 768) { sensorValue = 768;}
     if (sensorValue > 768 && sensorValue < 1024){ sensorValue = 1024;}
@@ -188,16 +212,12 @@ void tomaLuminosidad(bool mov){
     analogWrite(luzVerde,1023 - sensorValue);
     analogWrite(luzRoja, 1023 - sensorValue);
 
-    Serial.print("  LED= ");
-    Serial.print(1023 - sensorValue);
-    Serial.print("  Voltaje= ");
-    Serial.println(voltage);
   }
   else {
-    Serial.println("Mov = No ");
-    analogWrite(luzAzul, 1023 );
-    analogWrite(luzVerde,1023 );
-    analogWrite(luzRoja, 1023 );
+
+    analogWrite(luzAzul, 1024 );
+    analogWrite(luzVerde,1024 );
+    analogWrite(luzRoja, 1024 );
   }
 
 }
