@@ -2,13 +2,13 @@
 #define Cocina_h
 
 
-#define luzAzul     D0
-#define luzVerde    D1
-#define luzRoja     D2
-#define dht_dpin    D3      // GPIO-0 D3 pin of nodemcu
-#define oneWireBus  D5      // GPIO where the DS18B20 is connected to
+#define luzAzul     	D0
+#define luzVerde    	D1
+#define luzRoja     	D2
+#define dht_dpin    	D3      // GPIO-0 D3 pin of nodemcu
+#define oneWireBus  	D5      // GPIO where the DS18B20 is connected to
 #define releCaldera     D6
-#define movimiento  D7
+#define movimiento  	D7
 
 
 
